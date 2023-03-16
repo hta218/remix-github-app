@@ -3,9 +3,9 @@ import type { loader } from "~/routes/_index";
 import { openWindowPopup } from "~/utils";
 
 export function useGithubInstallation(onAuthenticated: (data: any) => void) {
-  let { env } = useLoaderData<typeof loader>();
+  let { data } = useLoaderData<typeof loader>();
   let handleInstallApp = () => {
-    let installURL = `https://github.com/login/oauth/authorize?client_id=${env.githubClientId}&redirect_uri=${env.callbackUrl}`;
+    let installURL = `https://github.com/apps/${data.slug}/installations/new`;
     openWindowPopup(installURL);
     window.addEventListener("storage", (e: StorageEvent) => {
       /**

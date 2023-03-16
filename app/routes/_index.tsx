@@ -37,10 +37,11 @@ export default function Index() {
     setCredentials(cre);
   });
 
-  let fetcher = useFetcher();
+  let userFetcher = useFetcher();
+  let repoFetcher = useFetcher();
   useEffect(() => {
     if (authenticated) {
-      fetcher.submit(
+      userFetcher.submit(
         { data: JSON.stringify({ access_token: credentials.access_token }) },
         {
           action: "/?index",
@@ -52,39 +53,84 @@ export default function Index() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [authenticated]);
 
+  let handleCreateRepo = () => {
+    repoFetcher.submit(
+      { data: JSON.stringify({ access_token: credentials.access_token }) },
+      {
+        action: "/api/github",
+        method: "post",
+        replace: true,
+      }
+    );
+  };
+
   return (
     <main className="p-16 space-y-8">
       <h1 className="text-5xl font-medium">Weaverse github app</h1>
       <div className="space-y-6">
-        <div>App name: {data.name}</div>
-        <button
-          className="bg-blue-500 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded"
-          onClick={handleInstallApp}
-        >
-          Install Github App
-        </button>
+        <div className="space-y-2">
+          <p className="text-green-600 font-medium">App data</p>
+          <pre className="bg-info-100 p-4 text-base">
+            {JSON.stringify(data, null, 2)}
+          </pre>
+        </div>
+        <div className="flex space-x-4">
+          <button
+            className="bg-blue-500 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded"
+            onClick={handleInstallApp}
+          >
+            Install Github App
+          </button>
+          {authenticated && (
+            <button
+              className="bg-blue-500 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded"
+              onClick={handleCreateRepo}
+            >
+              {repoFetcher.state === "submitting"
+                ? "Creating..."
+                : "Create a repo"}
+            </button>
+          )}
+        </div>
       </div>
-      {authenticated && (
-        <div className="space-y-2">
-          <p className="text-green-600 font-medium">
-            Authenticated successfully!
-          </p>
-          <pre className="bg-info-100 p-4 text-base">
-            {JSON.stringify(credentials, null, 2)}
-          </pre>
+      <div className="flex space-x-4">
+        <div className="space-y-8">
+          {authenticated && (
+            <div className="space-y-2">
+              <p className="text-green-600 font-medium">
+                Authenticated successfully!
+              </p>
+              <pre className="bg-info-100 p-4 text-base">
+                {JSON.stringify(credentials, null, 2)}
+              </pre>
+            </div>
+          )}
+          {authenticated && userFetcher.state === "submitting" && (
+            <div>Fetching user data...</div>
+          )}
+          {authenticated && userFetcher.data && (
+            <div className="space-y-2">
+              <p className="text-green-600 font-medium">User info!</p>
+              <pre className="bg-info-100 p-4 text-base">
+                {JSON.stringify(userFetcher.data, null, 2)}
+              </pre>
+            </div>
+          )}
         </div>
-      )}
-      {authenticated && fetcher.state === "submitting" && (
-        <div>Fetching user data...</div>
-      )}
-      {authenticated && fetcher.data && (
-        <div className="space-y-2">
-          <p className="text-green-600 font-medium">User info!</p>
-          <pre className="bg-info-100 p-4 text-base">
-            {JSON.stringify(fetcher.data, null, 2)}
-          </pre>
+        <div className="space-y-8">
+          {authenticated && repoFetcher.state === "submitting" && (
+            <div>Creating a repo...</div>
+          )}
+          {authenticated && repoFetcher.data && (
+            <div className="space-y-2">
+              <p className="text-green-600 font-medium">Repo info!</p>
+              <pre className="bg-info-100 p-4 text-base">
+                {JSON.stringify(repoFetcher.data, null, 2)}
+              </pre>
+            </div>
+          )}
         </div>
-      )}
+      </div>
     </main>
   );
 }
