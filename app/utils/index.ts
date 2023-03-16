@@ -46,3 +46,14 @@ export function getRequestQueries<T = Record<string, string>>(
     return q;
   }, {}) as T;
 }
+
+/**
+ * Get data submitted by `useRouteSubmission` hook
+ *
+ * @param request - The request object
+ */
+export async function getSubmissionData(request: Request) {
+  if (request.method === "DELETE") return null;
+  let formData = await request.formData();
+  return JSON.parse(formData.get("data") as string);
+}

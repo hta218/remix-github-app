@@ -1,9 +1,11 @@
-import type { LoaderFunction } from "@remix-run/node";
+import type { ActionFunction, LoaderFunction } from "@remix-run/node";
 import { json } from "@remix-run/node";
 import { App } from "octokit";
-import { useLoaderData } from "@remix-run/react";
+import { useFetcher, useLoaderData } from "@remix-run/react";
 import { useGithubInstallation } from "~/hooks/use-github-installation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { getSubmissionData } from "~/utils";
+import { fetchUserData } from "~/utils/github";
 
 export let loader: LoaderFunction = async () => {
   let app = new App({
@@ -20,6 +22,12 @@ export let loader: LoaderFunction = async () => {
   });
 };
 
+export let action: ActionFunction = async ({ request }) => {
+  let submitData = await getSubmissionData(request);
+  let user = await fetchUserData(submitData.access_token);
+  return json({ user });
+};
+
 export default function Index() {
   let { data } = useLoaderData();
   let [authenticated, setAuthenticated] = useState(false);
@@ -28,6 +36,21 @@ export default function Index() {
     setAuthenticated(true);
     setCredentials(cre);
   });
+
+  let fetcher = useFetcher();
+  useEffect(() => {
+    if (authenticated) {
+      fetcher.submit(
+        { data: JSON.stringify({ access_token: credentials.access_token }) },
+        {
+          action: "/?index",
+          method: "post",
+          replace: true,
+        }
+      );
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [authenticated]);
 
   return (
     <main className="p-16 space-y-8">
@@ -48,6 +71,17 @@ export default function Index() {
           </p>
           <pre className="bg-info-100 p-4 text-base">
             {JSON.stringify(credentials, null, 2)}
+          </pre>
+        </div>
+      )}
+      {authenticated && fetcher.state === "submitting" && (
+        <div>Fetching user data...</div>
+      )}
+      {authenticated && fetcher.data && (
+        <div className="space-y-2">
+          <p className="text-green-600 font-medium">User info!</p>
+          <pre className="bg-info-100 p-4 text-base">
+            {JSON.stringify(fetcher.data, null, 2)}
           </pre>
         </div>
       )}

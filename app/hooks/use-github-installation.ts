@@ -18,6 +18,7 @@ export function useGithubInstallation(onAuthenticated: (data: any) => void) {
         if (e.newValue === null) return;
         let data = JSON.parse(e.newValue);
         onAuthenticated?.(data);
+        localStorage.removeItem("github-app-credentials");
       }
     });
   };

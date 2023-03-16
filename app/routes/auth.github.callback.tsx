@@ -11,7 +11,7 @@ export let loader: LoaderFunction = async ({ request }) => {
   return json({ data });
 };
 
-export default function Foo() {
+export default function GithubCallback() {
   let { data } = useLoaderData();
   useEffect(() => {
     window.localStorage.setItem("github-app-credentials", JSON.stringify(data));
