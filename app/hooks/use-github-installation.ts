@@ -6,7 +6,7 @@ export function useGithubInstallation(onAuthenticated: (data: any) => void) {
   let { data } = useLoaderData<typeof loader>();
   let handleInstallApp = () => {
     let installURL = `https://github.com/apps/${data.slug}/installations/new`;
-    openWindowPopup(installURL);
+    openWindowPopup(installURL, { width: 800, height: 800 });
     window.addEventListener("storage", (e: StorageEvent) => {
       /**
        * There might be an edge case here if user open multiple windows and connect to multiple accounts

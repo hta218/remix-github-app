@@ -1,10 +1,16 @@
 import { json } from "@remix-run/node";
 import type { ActionFunction } from "react-router";
 import { getSubmissionData } from "~/utils";
-import { createRepo } from "~/utils/github";
+import { createRepoFromTemplate, pushChanges } from "~/utils/github";
 
 export let action: ActionFunction = async ({ request }) => {
-  let submitData = await getSubmissionData(request);
-  let repo = await createRepo(submitData.access_token);
-  return json({ repo });
+  let { access_token, owner, name, repo, path, content, action } =
+    await getSubmissionData(request);
+  if (action === "create") {
+    let repo = await createRepoFromTemplate(access_token, owner, name);
+    return json({ repo });
+  } else {
+    let file = await pushChanges(access_token, owner, repo, path, content);
+    return json({ file });
+  }
 };

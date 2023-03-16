@@ -25,7 +25,10 @@ export default function App() {
         <Meta />
         <Links />
       </head>
-      <body>
+      <body
+        style={{ opacity: 0, transition: "opacity .15s ease" }}
+        className="!opacity-100"
+      >
         <Outlet />
         <ScrollRestoration />
         <Scripts />

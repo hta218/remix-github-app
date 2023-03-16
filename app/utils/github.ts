@@ -31,18 +31,54 @@ export async function fetchUserData(accessToken: string) {
   return await res.json();
 }
 
-export async function createRepo(accessToken: string) {
+export async function createRepoFromTemplate(
+  accessToken: string,
+  owner: string,
+  name: string
+) {
+  let octokit = new Octokit({
+    auth: accessToken,
+  });
+  return await octokit.request("POST /repos/hta218/shopify-h2-demo/generate", {
+    owner,
+    name,
+    description: "Hydrogen storefront template created by Weaverse app",
+    include_all_branches: false,
+    private: false,
+    headers: {
+      Accepts: "application/vnd.github+json",
+      "X-GitHub-Api-Version": "2022-11-28",
+    },
+  });
+}
+
+export async function pushChanges(
+	accessToken: string,
+  owner: string,
+  repo: string,
+  path: string,
+  content: string
+) {
   let octokit = new Octokit({
     auth: accessToken,
   });
 
-  return await octokit.request("POST /user/repos", {
-    name: "repo-created-by-weaverse-github-app",
-    description: "This is a repo created by Weaverse GitHub App",
-    homepage: "https://github.com",
-    private: false,
-    is_template: true,
+  let file = await octokit.request(
+    `GET /repos/${owner}/${repo}/contents/${path}`,
+    {
+      headers: {
+        Accepts: "application/vnd.github+json",
+        "X-GitHub-Api-Version": "2022-11-28",
+      },
+    }
+  );
+
+  return await octokit.request(`PUT /repos/${owner}/${repo}/contents/${path}`, {
+    message: "Update root",
+    content: Buffer.from(content).toString("base64"),
+    sha: file.data.sha,
     headers: {
+      Accepts: "application/vnd.github+json",
       "X-GitHub-Api-Version": "2022-11-28",
     },
   });
