@@ -1,3 +1,5 @@
+import { Octokit } from "octokit";
+
 let GITHUB_ACCESS_TOKEN_API = "https://github.com/login/oauth/access_token";
 
 export async function exchangeCodeForAccessToken(code: string) {
@@ -27,4 +29,21 @@ export async function fetchUserData(accessToken: string) {
     },
   });
   return await res.json();
+}
+
+export async function createRepo(accessToken: string) {
+  let octokit = new Octokit({
+    auth: accessToken,
+  });
+
+  return await octokit.request("POST /user/repos", {
+    name: "repo-created-by-weaverse-github-app",
+    description: "This is a repo created by Weaverse GitHub App",
+    homepage: "https://github.com",
+    private: false,
+    is_template: true,
+    headers: {
+      "X-GitHub-Api-Version": "2022-11-28",
+    },
+  });
 }
